@@ -98,6 +98,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const upload = multer({ dest: "uploads/" });
@@ -113,7 +114,14 @@ let envioAtivo = false;
 
 async function startWhatsApp() {
 
-  const { state, saveCreds } = await useMultiFileAuthState("./auth");
+  const authPath = path.join(__dirname, "data", "auth");
+
+  if (!fs.existsSync(authPath)) {
+    fs.mkdirSync(authPath, { recursive: true });
+  }
+
+  const { state, saveCreds } = await useMultiFileAuthState(authPath);
+
   const { version } = await fetchLatestBaileysVersion();
 
   sock = makeWASocket({
@@ -282,6 +290,200 @@ app.post("/parar", (req, res) => {
   clearTimeout(loopEnvio);
   res.json({ ok: true });
 });
+
+// ======================================
+// 📋 EXTRAIR CONTATOS
+// ======================================
+app.get("/api/extrair/:grupoId", async (req, res) => {
+  try {
+
+    if (whatsappStatus !== "conectado") {
+      return res.status(400).json({ erro: "WhatsApp desconectado" });
+    }
+
+    const grupoId = req.params.grupoId;
+
+    const metadata = await sock.groupMetadata(grupoId);
+
+    if (!metadata?.participants) {
+      return res.status(400).json({
+        erro: "Grupo sem participantes"
+      });
+    }
+
+    const contatos = metadata.participants.map(p => ({
+      nome:
+        p.notify ||
+        p.verifiedName ||
+        p.id.split("@")[0],
+
+      numero: p.id.replace("@s.whatsapp.net", "")
+    }));
+
+    res.json({
+      sucesso: true,
+      contatos
+    });
+
+  } catch (err) {
+    console.error("❌ Erro extrair:", err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// ======================================
+// 📨 ENVIAR PRIVADO
+// ======================================
+app.post("/api/enviar", async (req, res) => {
+  try {
+
+    if (whatsappStatus !== "conectado") {
+      return res.status(400).json({ erro: "WhatsApp desconectado" });
+    }
+
+    const contatos = req.body.contatos || [];
+    const mensagem = req.body.mensagem || "";
+
+    if (!contatos.length) {
+      return res.status(400).json({
+        erro: "Nenhum contato enviado"
+      });
+    }
+
+    let enviados = 0;
+    let erros = 0;
+    let ignorados = 0;
+
+    let enviadosNoCiclo = 0;
+
+    console.log(`🚀 Envio para ${contatos.length} contatos`);
+
+    function delayHumano() {
+      return 8000 + Math.floor(Math.random() * 15000);
+    }
+
+    for (const contato of contatos) {
+
+      if (whatsappStatus !== "conectado") {
+        await delay(15000);
+        continue;
+      }
+
+      if (
+        !contato.numero ||
+        contato.numero.includes("@lid") ||
+        contato.numero.length < 10
+      ) {
+        ignorados++;
+        continue;
+      }
+
+      const jid = contato.numero + "@s.whatsapp.net";
+
+      if (enviadosNoCiclo >= 10) {
+        console.log("⏳ Pausa de 1 hora...");
+        await delay(60 * 60 * 1000);
+        enviadosNoCiclo = 0;
+      }
+
+      try {
+
+        await sock.sendPresenceUpdate("composing", jid);
+        await delay(2000 + Math.random() * 3000);
+
+        await sock.sendMessage(jid, { text: mensagem });
+
+        enviados++;
+        enviadosNoCiclo++;
+
+        console.log("✅", contato.numero);
+
+      } catch (err) {
+
+        erros++;
+        console.log("❌ erro", contato.numero);
+
+        // retry
+        try {
+          await delay(5000);
+          await sock.sendMessage(jid, { text: mensagem });
+          enviados++;
+          enviadosNoCiclo++;
+        } catch {}
+      }
+
+      await delay(delayHumano());
+    }
+
+    res.json({
+      sucesso: true,
+      enviados,
+      erros,
+      ignorados
+    });
+
+  } catch (err) {
+    console.error("❌ erro geral:", err);
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// ======================================
+// ⚙️ CONFIG RESPOSTAS
+// ======================================
+app.get("/api/respostas", (req, res) => {
+  try {
+    const data = readJSON(configPath);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+app.post("/api/respostas", (req, res) => {
+  try {
+    writeJSON(configPath, req.body);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+// ======================================
+// 🔌 ATIVAR / DESATIVAR BOT
+// ======================================
+app.post("/api/respostas/ativar", (req, res) => {
+  try {
+
+    const data = readJSON(configPath);
+
+    data.ativo = !!req.body.ativo;
+
+    writeJSON(configPath, data);
+
+    res.json({
+      ativo: data.ativo
+    });
+
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ======================================
 // 🚀 START
