@@ -1,0 +1,106 @@
+{
+  "ativo": true,
+  "privado": {
+    "gatilhos": [
+      "oi",
+      "ola",
+      "olá",
+      "opa",
+      "eae",
+      "bom dia",
+      "boa tarde",
+      "boa noite",
+      "tudo bem",
+      "como funciona",
+      "quero saber",
+      "me explica",
+      "tenho interesse",
+      "interesse",
+      "renda extra",
+      "ganhar dinheiro",
+      "dinheiro",
+      "funciona",
+      "quero começar"
+    ],
+    "resposta": "Fala comigo 👋\n\nVi que você quer uma forma de ganhar dinheiro usando só o celular 📱💸\n\nMe manda *\"como funciona\"* que eu te explico rapidinho 👍"
+  },
+  "grupo": {
+    "gatilhos": [],
+    "resposta": ""
+  },
+  "funil": {
+    "ativo": true,
+    "gatilhos": [
+      "como funciona",
+      "funciona",
+      "quero saber",
+      "me explica",
+      "explica",
+      "interesse",
+      "tenho interesse",
+      "quero",
+      "ganhar dinheiro",
+      "renda extra",
+      "me chama",
+      "fala ai",
+      "curti",
+      "quero começar",
+      "como ganha",
+      "da dinheiro",
+      "quero entrar",
+      "me manda",
+      "manda"
+    ],
+    "respostas_positivas": [
+      "sim",
+      "ss",
+      "s",
+      "claro",
+      "com certeza",
+      "quero",
+      "manda",
+      "pode mandar",
+      "continua",
+      "ok",
+      "blz",
+      "beleza",
+      "show",
+      "top",
+      "curti",
+      "interessante",
+      "legal",
+      "bora",
+      "quero sim",
+      "tenho interesse",
+      "explica",
+      "me mostra",
+      "como faz",
+      "quero aprender",
+      "primeira vez",
+      "faz",
+      "tentei"
+    ],
+    "etapas": [
+      {
+        "mensagem": "Fala {{nome}} 👋\n\nVou ser direto contigo...\n\nExiste um jeito simples de fazer dinheiro pelo celular, mesmo começando do zero 📱💸\n\nQuer que eu te explique como funciona?",
+        "delay": 4,
+        "esperarResposta": true
+      },
+      {
+        "mensagem": "Basicamente é um método com várias formas de ganhar dinheiro online usando só o celular.\n\n✔️ Nada complicado\n✔️ Sem precisar aparecer\n✔️ Dá pra começar do zero\n\nE o diferencial:\n\nVocê também pode ganhar com indicações e criar renda todos os dias 🔥\n\nVocê já tentou ganhar dinheiro online antes?",
+        "delay": 6,
+        "esperarResposta": true
+      },
+      {
+        "mensagem": "Entendi 👍\n\nA maioria das pessoas já tentou várias coisas e não teve resultado mesmo...\n\nO problema é que sempre mostram só partes — nunca o caminho completo.\n\nAqui você recebe tudo organizado:\n\n✔️ 7 formas reais de ganhar dinheiro\n✔️ Apps que realmente pagam\n✔️ Estratégia simples pra começar hoje\n✔️ Método de indicação (onde está o lucro de verdade)\n\nMesmo começando do zero.\n\nSe fizer sentido pra você, posso te mostrar como começar hoje 👀",
+        "delay": 8,
+        "esperarResposta": true
+      },
+      {
+        "mensagem": "Perfeito 👇\n\nVou ser direto contigo.\n\nEsse é um guia completo que mostra exatamente o passo a passo pra começar a fazer de R$30 a R$200 por dia usando só o celular.\n\nVocê não depende de uma única forma — são várias formas + estratégia pra escalar.\n\nE o melhor:\n\n💸 Valor simbólico (menos que um lanche)\n✅ Acesso imediato\n🔒 7 dias de garantia\n\n👉 Acessa aqui:\nhttps://pay.cakto.com.br/xdbibi3_579312\n\nSe tiver dúvida, me chama aqui 👍",
+        "delay": 10,
+        "esperarResposta": false
+      }
+    ]
+  }
+}

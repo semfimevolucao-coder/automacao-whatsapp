@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Automação WhatsApp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 40px;
+      color: #333;
+    }
+
+    nav { background:#0078d7; color:white; padding:15px; display:flex; justify-content:center; gap:30px; }
+    nav a { color:white; text-decoration:none; font-weight:bold; }
+    nav a:hover { text-decoration:underline; }
+    .content { padding:20px; }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    section {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #1a73e8;
+    }
+    p {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #155ab6;
+    }
+    input[type="file"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    textarea {
+      resize: vertical;
+      height: 120px;
+    }
+    .image-box {
+      width: 100%;
+      height: 200px;
+      background-color: #f0f0f0;
+      border: 2px dashed #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      font-weight: 500;
+      color: #666;
+    }
+    .grupo-selecao {
+      margin-bottom: 15px;
+    }
+    .temporizador label {
+      display: inline-block;
+      margin-right: 20px;
+      font-size: 15px;
+    }
+    #statusConexao,
+    #status,
+    #ultimaMensagem,
+    #resumoEnvio {
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    #qr-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #qr-container img {
+      max-width: 300px;
+      border: 2px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="automazap.html">📤 Envio em Massa</a>
+    <a href="extrator.html">📋 Extrator de Contatos</a>
+    <a href="respostas.html">🤖 Respostas Automáticas</a>
+    <a href="ajuda.html">📖 Ajuda</a>
+  </nav>
+  <div class="container">
+    <section class="cabecalho">
+      <h2><i class="fab fa-whatsapp"></i> Automação WhatsApp</h2>
+      <p>Sistema premium para enviar mensagens automáticas em grupos do WhatsApp com texto, imagem e temporizador.</p>
+      <button id="verificar"><i class="fas fa-link"></i> Verificar Conexão</button>
+      <p id="statusConexao">Status: aguardando verificação...</p>
+    </section>
+
+    <div id="qr-container"></div>
+
+    <section class="imagem">
+      <h2><i class="fas fa-image"></i> Imagem</h2>
+      <div id="preview" class="image-box">Pré-visualização</div>
+      <input type="file" id="imageInput" accept="image/*">
+    </section>
+
+    <section class="texto">
+      <h2><i class="fas fa-comment-dots"></i> Mensagem</h2>
+      <textarea id="mensagem" placeholder="Digite sua mensagem aqui..."></textarea>
+    </section>
+
+    <section class="grupos">
+      <h2><i class="fas fa-users"></i> Grupos</h2>
+      <div id="grupo-container"></div>
+    </section>
+
+    <section class="temporizador">
+      <h2><i class="fas fa-clock"></i> Temporizador</h2>
+      <label><input type="radio" name="tempo" value="30"> 30 minutos</label>
+      <label><input type="radio" name="tempo" value="60"> 1 hora</label>
+    </section>
+
+    <section class="enviar">
+      <h2><i class="fas fa-paper-plane"></i> Status</h2>
+      <p id="status">Aguardando mensagem...</p>
+      <p id="ultimaMensagem">Primeira mensagem enviada: --:--</p>
+      <p id="resumoEnvio">Mensagens enviadas: 0 de 20</p>
+      <button id="enviar"><i class="fas fa-play"></i> Enviar</button>
+      <button id="parar"><i class="fas fa-stop"></i> Parar</button>
+    </section>
+
+<p style="font-size: 12px; color: #666; margin-top: 20px; line-height: 1.4;">
+⚠️ As mensagens são enviadas de forma <strong>escalonada</strong>, com intervalos automáticos entre cada grupo, para evitar bloqueios e garantir o tempo selecionado.  
+Mesmo que você escolha apenas alguns grupos, os intervalos ainda serão respeitados.  
+ Use com moderação, altere o texto das mensagens sempre que possível e evite usar outras automações ao mesmo tempo.
+</p>
+
+
+  <!-- <p>Versão instalada: <strong id="currentVersion">Versão Final</strong></p>-->
+
+
+  <!-- Botão para consultar atualizações <button onclick="checkUpdate()">Consultar Atualizações</button> -->
+
+  <!-- Área onde aparece a resposta -->
+  <div id="updateInfo"></div>
+
+  </div>
+
+<script>
+  document.getElementById("verificar").addEventListener("click", async () => {
+    try {
+      const res = await fetch("http://localhost:3000/verificar");
+      const data = await res.json();
+      document.getElementById("statusConexao").innerText = "Status: " + data.status;
+
+      const qrContainer = document.getElementById("qr-container");
+
+      if (data.status === "desconectado") {
+        const qrRes = await fetch("http://localhost:3000/qr");
+        if (qrRes.ok) {
+          const qrData = await qrRes.json();
+          qrContainer.innerHTML = `<img src="${qrData.qr}" alt="QR Code">`;
+        } else {
+          qrContainer.innerText = "QR Code não disponível";
+        }
+      } else {
+        qrContainer.innerHTML = "";
+        carregarGrupos();
+      }
+    } catch (erro) {
+      document.getElementById("statusConexao").innerText = "Status: erro ao verificar conexão";
+      console.error("Erro na verificação:", erro);
+    }
+  });
+
+  const imageInput = document.getElementById("imageInput");
+  const preview = document.getElementById("preview");
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.innerHTML = `<img src="${reader.result}" style="max-width:100%; max-height:100%;">`;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.innerHTML = "Pré-visualização";
+    }
+  });
+
+  async function carregarGrupos() {
+    try {
+      const resposta = await fetch("http://localhost:3000/grupos");
+      const grupos = await resposta.json();
+      const container = document.getElementById("grupo-container");
+      container.innerHTML = "";
+
+      for (let i = 1; i <= 20; i++) {
+        const div = document.createElement("div");
+        div.className = "grupo-selecao";
+
+        const label = document.createElement("label");
+        label.setAttribute("for", `grupo${i}`);
+        label.textContent = `Grupo ${i}:`;
+
+        const select = document.createElement("select");
+        select.id = `grupo${i}`;
+        select.innerHTML = '<option value="">Selecione</option>';
+
+        grupos.forEach(grupo => {
+          const option = document.createElement("option");
+          option.value = grupo.id;
+          option.textContent = grupo.nome;
+          select.appendChild(option);
+        });
+
+        div.appendChild(label);
+        div.appendChild(select);
+        container.appendChild(div);
+      }
+    } catch (erro) {
+      console.error("Erro ao carregar grupos:", erro);
+    }
+  }
+
+document.getElementById("enviar").addEventListener("click", async () => {
+  const mensagem = document.getElementById("mensagem").value;
+  const tempoSelecionado = document.querySelector('input[name="tempo"]:checked');
+  const tempo = tempoSelecionado ? tempoSelecionado.value : "30";
+
+  const grupos = [];
+  for (let i = 1; i <= 20; i++) {
+    const select = document.getElementById(`grupo${i}`);
+    if (select && select.value) {
+      grupos.push(select.value);
+    }
+  }
+
+
+
+  const formData = new FormData();
+  formData.append("mensagem", mensagem);
+  formData.append("tempo", tempo);
+  formData.append("grupos", JSON.stringify(grupos));
+
+  const imageInput = document.getElementById("imageInput");
+  if (imageInput.files[0]) {
+    formData.append("imagem", imageInput.files[0]);
+  }
+
+  try {
+    const resposta = await fetch("http://localhost:3000/agendar", {
+      method: "POST",
+      body: formData
+    });
+    const resultado = await resposta.json();
+
+    // ✅ Atualiza status visual
+    document.getElementById("status").textContent = resultado.mensagem || "Mensagem agendada!";
+    document.getElementById("ultimaMensagem").textContent = `Primeira mensagem enviada: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    // ✅ Calcula e exibe próximo envio
+    const agora = new Date();
+    const proximoEnvio = new Date(agora.getTime() + (tempo === "60" ? 60 : 30) * 60 * 1000);
+    const horaFormatada = proximoEnvio.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    document.getElementById("resumoEnvio").textContent = `Mensagens enviadas: ${grupos.length} de 20 | Próximo envio: ${horaFormatada}`;
+  } catch (erro) {
+    console.error("Erro ao enviar:", erro);
+    document.getElementById("status").textContent = "Erro ao agendar mensagem.";
+  }
+});
+
+document.getElementById("parar").addEventListener("click", async () => {
+  try {
+    const resposta = await fetch("http://localhost:3000/parar", { method: "POST" });
+    const resultado = await resposta.json();
+    document.getElementById("status").textContent = resultado.mensagem;
+  } catch (erro) {
+    console.error("Erro ao parar:", erro);
+    document.getElementById("status").textContent = "Erro ao parar envio.";
+  }
+});
+
+async function checkUpdate() {
+  const sql = "SELECT version, download_link, changelog, created_at FROM updates ORDER BY created_at DESC LIMIT 1";
+
+  try {
+    const res = await fetch("https://whatsapp-api-backend-j7kn.onrender.com/admin/sql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sql })
+    });
+
+    const data = await res.json();
+    const updateInfo = document.getElementById("updateInfo");
+
+    if (Array.isArray(data) && data.length > 0) {
+      const v = data[0];
+      updateInfo.innerHTML = `
+        <p><strong>📌 Última versão disponível:</strong> ${v.version}</p>
+        <p><strong>📅 Data de lançamento:</strong> ${v.created_at}</p>
+        <p><strong>📝 Changelog:</strong><br>${v.changelog || "Nenhum changelog informado"}</p>
+        <p><a href="${v.download_link}" target="_blank">🔗 Baixar nova versão</a></p>
+      `;
+
+      // Comparar com versão atual
+      const versaoAtual = document.getElementById("currentVersion").textContent.trim();
+      if (versaoAtual !== v.version) {
+        updateInfo.innerHTML += `<p style="color: red;"><strong>⚠️ Sua versão está desatualizada!</strong></p>`;
+      } else {
+        updateInfo.innerHTML += `<p style="color: green;"><strong>✅ Você já está na versão mais recente.</strong></p>`;
+      }
+    } else {
+      updateInfo.innerHTML = "<p>Nenhuma versão encontrada.</p>";
+    }
+  } catch (err) {
+    console.error("Erro ao consultar versão:", err);
+    document.getElementById("updateInfo").innerHTML = `<p style="color:red;">❌ Erro ao consultar atualizações.</p>`;
+  }
+}
+
+
+
+
+
+</script>
+</body>
+</html>
