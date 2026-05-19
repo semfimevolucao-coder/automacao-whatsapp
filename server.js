@@ -207,15 +207,18 @@ async function startWhatsApp() {
 // ======================================
 // 📩 ENVIO EM MASSA COM FILTRO (CORRIGIDO)
 // ======================================
+let primeiroCiclo = true;
+
 async function escalonarEnvio(grupos, mensagem, imagem) {
 
-  // 🔥 segurança total
   if (!Array.isArray(grupos) || grupos.length === 0) {
     console.log("⚠️ Nenhum grupo válido");
     return;
   }
 
   const stats = readJSON(grupoStatsPath) || {};
+
+  console.log("📢 Iniciando ciclo | Primeiro ciclo:", primeiroCiclo);
 
   for (let grupo of grupos) {
 
@@ -227,18 +230,15 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
     };
 
     // ======================================
-    // 🔥 REGRA ANTI-SPAM
+    // 🔥 REGRA ANTI-SPAM (SÓ APÓS PRIMEIRO CICLO)
     // ======================================
-    if (data.mensagens < 25) {
+    if (!primeiroCiclo && data.mensagens < 25) {
       console.log("⛔ Ignorado (sem atividade):", grupo);
       continue;
     }
 
     try {
 
-      // ======================================
-      // 📤 ENVIO COM OU SEM IMAGEM
-      // ======================================
       if (imagem) {
         await sock.sendMessage(grupo, {
           image: imagem.buffer,
@@ -252,9 +252,7 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
 
       console.log("✅ Enviado:", grupo);
 
-      // ======================================
-      // 🔄 RESET CONTADOR
-      // ======================================
+      // 🔄 RESET APENAS SE ENVIOU
       data.mensagens = 0;
       data.ultimaMensagemBot = Date.now();
 
@@ -265,11 +263,14 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
       console.log("❌ Erro ao enviar:", grupo, err?.message);
     }
 
-    // ======================================
-    // ⏱️ DELAY ANTI-BAN (ALEATÓRIO)
-    // ======================================
     const tempoDelay = 15000 + Math.random() * 10000;
     await delay(tempoDelay);
+  }
+
+  // 👉 depois do primeiro ciclo, ativa filtro
+  if (primeiroCiclo) {
+    console.log("✅ Primeiro ciclo concluído - ativando filtro anti-spam");
+    primeiroCiclo = false;
   }
 }
 
