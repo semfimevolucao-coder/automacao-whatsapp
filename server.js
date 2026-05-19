@@ -8,7 +8,6 @@ import QRCode from "qrcode";
 
 import makeWASocket, {
   useMultiFileAuthState,
-  DisconnectReason,
   fetchLatestBaileysVersion
 } from "@whiskeysockets/baileys";
 
@@ -101,7 +100,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
 // ======================================
 // 📲 WHATSAPP
@@ -204,31 +205,56 @@ async function startWhatsApp() {
 }
 
 // ======================================
-// 📩 ENVIO EM MASSA COM FILTRO
+// 📩 ENVIO EM MASSA COM FILTRO (CORRIGIDO)
 // ======================================
-async function escalonarEnvio(grupos, mensagem) {
+async function escalonarEnvio(grupos, mensagem, imagem) {
 
-  const stats = readJSON(grupoStatsPath);
+  // 🔥 segurança total
+  if (!Array.isArray(grupos) || grupos.length === 0) {
+    console.log("⚠️ Nenhum grupo válido");
+    return;
+  }
+
+  const stats = readJSON(grupoStatsPath) || {};
 
   for (let grupo of grupos) {
 
     if (!envioAtivo) break;
 
-    const data = stats[grupo] || { mensagens: 0 };
+    const data = stats[grupo] || {
+      mensagens: 0,
+      ultimaMensagemBot: 0
+    };
 
+    // ======================================
     // 🔥 REGRA ANTI-SPAM
+    // ======================================
     if (data.mensagens < 25) {
-      console.log("⛔ Ignorado:", grupo);
+      console.log("⛔ Ignorado (sem atividade):", grupo);
       continue;
     }
 
     try {
 
-      await sock.sendMessage(grupo, { text: mensagem });
+      // ======================================
+      // 📤 ENVIO COM OU SEM IMAGEM
+      // ======================================
+      if (imagem) {
+        await sock.sendMessage(grupo, {
+          image: imagem.buffer,
+          caption: mensagem || ""
+        });
+      } else {
+        await sock.sendMessage(grupo, {
+          text: mensagem
+        });
+      }
 
       console.log("✅ Enviado:", grupo);
 
-      // RESET
+      // ======================================
+      // 🔄 RESET CONTADOR
+      // ======================================
       data.mensagens = 0;
       data.ultimaMensagemBot = Date.now();
 
@@ -236,10 +262,14 @@ async function escalonarEnvio(grupos, mensagem) {
       writeJSON(grupoStatsPath, stats);
 
     } catch (err) {
-      console.log("❌ Erro:", grupo);
+      console.log("❌ Erro ao enviar:", grupo, err?.message);
     }
 
-    await delay(15000 + Math.random() * 10000);
+    // ======================================
+    // ⏱️ DELAY ANTI-BAN (ALEATÓRIO)
+    // ======================================
+    const tempoDelay = 15000 + Math.random() * 10000;
+    await delay(tempoDelay);
   }
 }
 
@@ -261,17 +291,14 @@ app.get("/grupos", (req, res) => {
   res.json(gruposDisponiveis);
 });
 
-// ======================================
-// 🚀 AGENDAR
-// ======================================
 let loopEnvio;
+let envioAtivo = false;
 
-app.post("/agendar", async (req, res) => {
+app.post("/agendar", upload.single("imagem"), async (req, res) => {
   try {
-
     let { grupos, mensagem, tempo } = req.body;
 
-    // 🔥 Corrige grupos vindo como string (FormData)
+    // 🔥 Corrigir grupos vindo como string
     if (typeof grupos === "string") {
       try {
         grupos = JSON.parse(grupos);
@@ -280,76 +307,58 @@ app.post("/agendar", async (req, res) => {
       }
     }
 
-    // 🔥 Segurança extra
-    if (!Array.isArray(grupos)) {
-      grupos = [];
+    // 🔥 Validação
+    if (!Array.isArray(grupos) || grupos.length === 0) {
+      return res.status(400).json({ erro: "Nenhum grupo selecionado" });
     }
 
-    // 🔥 Remove vazios/null
-    grupos = grupos.filter(g => g && typeof g === "string");
-
-    // ❌ Validação
-    if (!grupos.length) {
-      return res.status(400).json({
-        ok: false,
-        mensagem: "Nenhum grupo selecionado"
-      });
-    }
-
-    if (!mensagem || !mensagem.trim()) {
-      return res.status(400).json({
-        ok: false,
-        mensagem: "Mensagem vazia"
-      });
-    }
-
-    // 🔥 Define intervalo (30 ou 60 min)
-    let intervalo = 30 * 60 * 1000;
-    if (tempo == "60") {
-      intervalo = 60 * 60 * 1000;
+    if (!mensagem && !req.file) {
+      return res.status(400).json({ erro: "Envie mensagem ou imagem" });
     }
 
     envioAtivo = true;
 
-    // 🔥 Evita múltiplos loops
-    if (loopEnvio) {
-      clearTimeout(loopEnvio);
-    }
+    const intervalo = tempo === "60"
+      ? 60 * 60 * 1000
+      : 30 * 60 * 1000;
+
+    // 🔥 IMPORTANTE: salvar imagem fora do req (senão perde no loop)
+    const imagem = req.file
+      ? { buffer: req.file.buffer, mimetype: req.file.mimetype }
+      : null;
 
     async function loop() {
       if (!envioAtivo) return;
 
-      try {
-        await escalonarEnvio(grupos, mensagem);
-      } catch (err) {
-        console.error("❌ Erro no envio:", err);
-      }
+      await escalonarEnvio(grupos, mensagem, imagem);
 
       loopEnvio = setTimeout(loop, intervalo);
     }
 
-    // 🚀 inicia loop
     loop();
 
     res.json({
       ok: true,
-      mensagem: "Disparo iniciado com sucesso",
-      grupos: grupos.length
+      mensagem: "Envio iniciado com sucesso 🚀"
     });
 
   } catch (err) {
-    console.error("❌ erro /agendar:", err);
-    res.status(500).json({
-      ok: false,
-      erro: err.message
-    });
+    console.error("Erro no agendar:", err);
+    res.status(500).json({ erro: "Erro interno no servidor" });
   }
 });
 
 app.post("/parar", (req, res) => {
-  envioAtivo = false;
-  clearTimeout(loopEnvio);
-  res.json({ ok: true });
+  
+
+  if (loopEnvio) {
+    clearTimeout(loopEnvio);
+  }
+
+  res.json({
+    ok: true,
+    mensagem: "Envio pausado com sucesso 🛑"
+  });
 });
 
 // ======================================
