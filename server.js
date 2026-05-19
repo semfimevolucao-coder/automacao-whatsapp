@@ -267,22 +267,83 @@ app.get("/grupos", (req, res) => {
 let loopEnvio;
 
 app.post("/agendar", async (req, res) => {
+  try {
 
-  const { grupos, mensagem } = req.body;
+    let { grupos, mensagem, tempo } = req.body;
 
-  envioAtivo = true;
+    // 🔥 Corrige grupos vindo como string (FormData)
+    if (typeof grupos === "string") {
+      try {
+        grupos = JSON.parse(grupos);
+      } catch {
+        grupos = [];
+      }
+    }
 
-  async function loop() {
-    if (!envioAtivo) return;
+    // 🔥 Segurança extra
+    if (!Array.isArray(grupos)) {
+      grupos = [];
+    }
 
-    await escalonarEnvio(grupos, mensagem);
+    // 🔥 Remove vazios/null
+    grupos = grupos.filter(g => g && typeof g === "string");
 
-    loopEnvio = setTimeout(loop, 30 * 60 * 1000);
+    // ❌ Validação
+    if (!grupos.length) {
+      return res.status(400).json({
+        ok: false,
+        mensagem: "Nenhum grupo selecionado"
+      });
+    }
+
+    if (!mensagem || !mensagem.trim()) {
+      return res.status(400).json({
+        ok: false,
+        mensagem: "Mensagem vazia"
+      });
+    }
+
+    // 🔥 Define intervalo (30 ou 60 min)
+    let intervalo = 30 * 60 * 1000;
+    if (tempo == "60") {
+      intervalo = 60 * 60 * 1000;
+    }
+
+    envioAtivo = true;
+
+    // 🔥 Evita múltiplos loops
+    if (loopEnvio) {
+      clearTimeout(loopEnvio);
+    }
+
+    async function loop() {
+      if (!envioAtivo) return;
+
+      try {
+        await escalonarEnvio(grupos, mensagem);
+      } catch (err) {
+        console.error("❌ Erro no envio:", err);
+      }
+
+      loopEnvio = setTimeout(loop, intervalo);
+    }
+
+    // 🚀 inicia loop
+    loop();
+
+    res.json({
+      ok: true,
+      mensagem: "Disparo iniciado com sucesso",
+      grupos: grupos.length
+    });
+
+  } catch (err) {
+    console.error("❌ erro /agendar:", err);
+    res.status(500).json({
+      ok: false,
+      erro: err.message
+    });
   }
-
-  loop();
-
-  res.json({ ok: true });
 });
 
 app.post("/parar", (req, res) => {
