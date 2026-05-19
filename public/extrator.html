@@ -121,7 +121,7 @@ let contatosExtraidos = [];
 // 🔗 VERIFICAR
 // ================================
 document.getElementById("verificar").onclick = async () => {
-  const res = await fetch("http://localhost:3000/verificar");
+  const res = await fetch("${API_BASE}/verificar");
   const data = await res.json();
 
   document.getElementById("statusConexao").innerHTML =
@@ -138,7 +138,7 @@ document.getElementById("verificar").onclick = async () => {
 // 📦 GRUPOS
 // ================================
 async function carregarGrupos() {
-  const res = await fetch("http://localhost:3000/grupos");
+  const res = await fetch("${API_BASE}/grupos");
   const grupos = await res.json();
 
   const select = document.getElementById("grupo");
@@ -160,7 +160,7 @@ async function extrairContatos() {
   const grupoId = document.getElementById("grupo").value;
   if (!grupoId) return alert("Selecione um grupo");
 
-  const res = await fetch(`http://localhost:3000/api/extrair/${grupoId}`);
+  const res = await fetch(`${API_BASE}/api/extrair/${grupoId}`);
   const data = await res.json();
 
   // 🔥 FILTRO PESADO
@@ -231,7 +231,7 @@ async function enviarMensagens() {
     return alert("Nenhum contato válido");
   }
 
-  const res = await fetch("http://localhost:3000/api/enviar", {
+  const res = await fetch("${API_BASE}/api/enviar", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -259,7 +259,7 @@ async function salvarContatos() {
 
   if (!selecionados.length) return alert("Nada selecionado");
 
-  const res = await fetch("http://localhost:3000/api/salvar", {
+  const res = await fetch("${API_BASE}/api/salvar", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ contatos: selecionados })
