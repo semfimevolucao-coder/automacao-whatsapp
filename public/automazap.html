@@ -186,16 +186,17 @@ Mesmo que você escolha apenas alguns grupos, os intervalos ainda serão respeit
   </div>
 
 <script>
+  const API_BASE = window.location.origin;
   document.getElementById("verificar").addEventListener("click", async () => {
     try {
-      const res = await fetch("http://localhost:3000/verificar");
+      const res = await fetch(`${API_BASE}/verificar`);
       const data = await res.json();
       document.getElementById("statusConexao").innerText = "Status: " + data.status;
 
       const qrContainer = document.getElementById("qr-container");
 
       if (data.status === "desconectado") {
-        const qrRes = await fetch("http://localhost:3000/qr");
+        const qrRes = await fetch(`${API_BASE}/qr`);
         if (qrRes.ok) {
           const qrData = await qrRes.json();
           qrContainer.innerHTML = `<img src="${qrData.qr}" alt="QR Code">`;
@@ -229,7 +230,7 @@ Mesmo que você escolha apenas alguns grupos, os intervalos ainda serão respeit
 
   async function carregarGrupos() {
     try {
-      const resposta = await fetch("http://localhost:3000/grupos");
+      const resposta = await fetch(`${API_BASE}/grupos`);
       const grupos = await resposta.json();
       const container = document.getElementById("grupo-container");
       container.innerHTML = "";
@@ -288,7 +289,7 @@ document.getElementById("enviar").addEventListener("click", async () => {
   }
 
   try {
-    const resposta = await fetch("http://localhost:3000/agendar", {
+   const resposta = await fetch(`${API_BASE}/agendar`,  {
       method: "POST",
       body: formData
     });
@@ -312,7 +313,7 @@ document.getElementById("enviar").addEventListener("click", async () => {
 
 document.getElementById("parar").addEventListener("click", async () => {
   try {
-    const resposta = await fetch("http://localhost:3000/parar", { method: "POST" });
+    await fetch(`${API_BASE}/parar`, { method: "POST" });
     const resultado = await resposta.json();
     document.getElementById("status").textContent = resultado.mensagem;
   } catch (erro) {
