@@ -292,7 +292,7 @@ app.get("/grupos", (req, res) => {
 });
 
 let loopEnvio;
-let envioAtivo = false;
+
 
 app.post("/agendar", upload.single("imagem"), async (req, res) => {
   try {
