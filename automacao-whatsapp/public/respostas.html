@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Respostas Automáticas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#f4f7fb;
+  color:#222;
+}
+
+nav{
+  background:#0078d7;
+  padding:16px;
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  flex-wrap:wrap;
+}
+
+nav a{
+  color:#fff;
+  text-decoration:none;
+  font-weight:600;
+}
+
+.container{
+  max-width:1100px;
+  margin:30px auto;
+  background:#fff;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+h1{
+  margin-bottom:10px;
+  color:#0078d7;
+}
+
+h2{
+  margin-top:40px;
+  margin-bottom:15px;
+  color:#0078d7;
+  font-size:22px;
+}
+
+p{
+  margin-bottom:10px;
+}
+
+.status{
+  display:inline-block;
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.status.on{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.status.off{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.card{
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  padding:20px;
+  border-radius:14px;
+  margin-bottom:20px;
+}
+
+label{
+  display:block;
+  font-weight:600;
+  margin-bottom:6px;
+  margin-top:15px;
+}
+
+input,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  font-size:15px;
+  font-family:'Inter',sans-serif;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+small{
+  color:#666;
+}
+
+button{
+  border:none;
+  padding:12px 20px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.btn-primary{
+  background:#0078d7;
+  color:white;
+}
+
+.btn-primary:hover{
+  background:#0064b4;
+}
+
+.btn-danger{
+  background:#dc2626;
+  color:white;
+}
+
+.btn-danger:hover{
+  background:#b91c1c;
+}
+
+.btn-green{
+  background:#16a34a;
+  color:white;
+}
+
+.btn-green:hover{
+  background:#15803d;
+}
+
+.btn-gray{
+  background:#374151;
+  color:white;
+}
+
+.btn-gray:hover{
+  background:#1f2937;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
+
+.etapa{
+  background:white;
+  border:1px solid #ddd;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.etapa-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.etapa-title{
+  font-size:18px;
+  font-weight:700;
+  color:#0078d7;
+}
+
+.checkbox{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:15px;
+}
+
+.checkbox input{
+  width:auto;
+}
+
+.info-box{
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  padding:15px;
+  border-radius:12px;
+  margin-top:20px;
+  line-height:1.6;
+}
+
+@media(max-width:700px){
+
+  .container{
+    padding:20px;
+    margin:15px;
+  }
+
+  .actions{
+    flex-direction:column;
+  }
+
+  button{
+    width:100%;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+  <a href="automazap.html">📤 Envio em Massa</a>
+  <a href="extrator.html">📋 Extrator</a>
+  <a href="respostas.html">🤖 Respostas</a>
+  <a href="ajuda.html">📖 Ajuda</a>
+</nav>
+
+<div class="container">
+
+<h1>🤖 Respostas Automáticas</h1>
+
+<p>
+Configure respostas inteligentes, múltiplos gatilhos e funis automáticos.
+</p>
+
+<div id="statusAutomacao" class="status off">
+⛔ Desativado
+</div>
+
+<!-- ===================================== -->
+<!-- RESPOSTAS PRIVADAS -->
+<!-- ===================================== -->
+
+<h2>💬 Respostas Privadas</h2>
+
+<div class="card">
+
+<label>
+Gatilhos Privados
+</label>
+
+<input
+  type="text"
+  id="gatilhosPrivado"
+  placeholder="oi, olá, menu, preços"
+/>
+
+<small>
+Separe múltiplos gatilhos por vírgula.
+</small>
+
+<label>
+Resposta Privada
+</label>
+
+<textarea
+  id="respostaPrivado"
+  placeholder="Digite a resposta..."
+></textarea>
+
+</div>
+
+<!-- ===================================== -->
+<!-- RESPOSTAS GRUPO -->
+<!-- ===================================== -->
+
+<h2>👥 Respostas em Grupo</h2>
+
+<div class="card">
+
+<label>
+Gatilhos de Grupo
+</label>
+
+<input
+  type="text"
+  id="gatilhosGrupo"
+  placeholder="menu, suporte, ajuda"
+/>
+
+<small>
+Separe múltiplos gatilhos por vírgula.
+</small>
+
+<label>
+Resposta Grupo
+</label>
+
+<textarea
+  id="respostaGrupo"
+  placeholder="Digite a resposta..."
+></textarea>
+
+</div>
+
+<!-- ===================================== -->
+<!-- FUNIL -->
+<!-- ===================================== -->
+
+<h2>🚀 Funil Inteligente</h2>
+
+<div class="card">
+
+<label>
+Gatilhos do Funil
+</label>
+
+<input
+  type="text"
+  id="gatilhosFunil"
+  placeholder="tenho interesse, quero saber, me chama"
+/>
+
+<small>
+Quando o usuário falar qualquer uma dessas frases o funil começa.
+</small>
+
+<label>
+Respostas Positivas
+</label>
+
+<input
+  type="text"
+  id="respostasPositivas"
+  placeholder="sim, quero, ok, claro"
+/>
+
+<small>
+Quando o usuário responder uma dessas palavras o funil continua.
+</small>
+
+</div>
+
+<!-- ===================================== -->
+<!-- ETAPAS -->
+<!-- ===================================== -->
+
+<h2>📩 Etapas do Funil</h2>
+
+<div id="funilEtapas"></div>
+
+<div class="actions">
+  <button class="btn-primary" onclick="adicionarEtapa()">
+    ➕ Adicionar Etapa
+  </button>
+</div>
+
+<!-- ===================================== -->
+<!-- AÇÕES -->
+<!-- ===================================== -->
+
+<div class="actions">
+
+  <button class="btn-green" onclick="salvar()">
+    💾 Salvar Tudo
+  </button>
+
+  <button class="btn-gray" onclick="alternar()">
+    🔁 Ativar / Desativar Bot
+  </button>
+
+</div>
+
+<div class="info-box">
+<b>Variáveis disponíveis:</b><br><br>
+
+{{nome}} → Nome do contato<br>
+{{numero}} → Número do usuário
+</div>
+
+</div>
+
+<script>
+
+let automacaoAtiva = false;
+let etapas = [];
+
+// =====================================
+// STATUS
+// =====================================
+
+function atualizarStatus(){
+
+  const el =
+    document.getElementById("statusAutomacao");
+
+  if(automacaoAtiva){
+
+    el.className = "status on";
+    el.innerText = "✅ Automação Ativa";
+
+  }else{
+
+    el.className = "status off";
+    el.innerText = "⛔ Automação Desativada";
+  }
+}
+
+// =====================================
+// HELPERS
+// =====================================
+
+function textoParaArray(texto){
+
+  return texto
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
+}
+
+// =====================================
+// CARREGAR
+// =====================================
+
+async function carregar(){
+
+  try{
+
+    const res =
+      await fetch("/api/respostas");
+
+    const data =
+      await res.json();
+
+    // PRIVADO
+
+    document.getElementById("gatilhosPrivado").value =
+      (data.privado?.gatilhos || []).join(", ");
+
+    document.getElementById("respostaPrivado").value =
+      data.privado?.resposta || "";
+
+    // GRUPO
+
+    document.getElementById("gatilhosGrupo").value =
+      (data.grupo?.gatilhos || []).join(", ");
+
+    document.getElementById("respostaGrupo").value =
+      data.grupo?.resposta || "";
+
+    // FUNIL
+
+    document.getElementById("gatilhosFunil").value =
+      (data.funil?.gatilhos || []).join(", ");
+
+    document.getElementById("respostasPositivas").value =
+      (data.funil?.respostas_positivas || []).join(", ");
+
+    etapas =
+      data.funil?.etapas || [];
+
+    automacaoAtiva =
+      data.ativo || false;
+
+    renderEtapas();
+
+    atualizarStatus();
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Erro ao carregar configurações");
+  }
+}
+
+// =====================================
+// RENDER ETAPAS
+// =====================================
+
+function renderEtapas(){
+
+  const container =
+    document.getElementById("funilEtapas");
+
+  container.innerHTML = "";
+
+  etapas.forEach((etapa, i) => {
+
+    container.innerHTML += `
+
+      <div class="etapa">
+
+        <div class="etapa-top">
+
+          <div class="etapa-title">
+            Etapa ${i + 1}
+          </div>
+
+          <button
+            class="btn-danger"
+            onclick="removerEtapa(${i})"
+          >
+            ❌ Remover
+          </button>
+
+        </div>
+
+        <label>
+          Mensagem
+        </label>
+
+        <textarea
+          onchange="atualizarMensagem(${i}, this.value)"
+        >${etapa.mensagem || ""}</textarea>
+
+        <label>
+          Delay (segundos)
+        </label>
+
+        <input
+          type="number"
+          min="1"
+          value="${etapa.delay || 2}"
+          onchange="atualizarDelay(${i}, this.value)"
+        />
+
+        <div class="checkbox">
+
+          <input
+            type="checkbox"
+            id="espera${i}"
+            ${etapa.esperarResposta ? "checked" : ""}
+            onchange="atualizarEspera(${i}, this.checked)"
+          />
+
+          <label for="espera${i}">
+            Esperar resposta positiva para continuar
+          </label>
+
+        </div>
+
+      </div>
+
+    `;
+  });
+}
+
+// =====================================
+// ETAPAS
+// =====================================
+
+function adicionarEtapa(){
+
+  etapas.push({
+    mensagem:"",
+    delay:2,
+    esperarResposta:false
+  });
+
+  renderEtapas();
+}
+
+function removerEtapa(i){
+
+  etapas.splice(i,1);
+
+  renderEtapas();
+}
+
+function atualizarMensagem(i, valor){
+
+  etapas[i].mensagem = valor;
+}
+
+function atualizarDelay(i, valor){
+
+  etapas[i].delay =
+    parseInt(valor) || 2;
+}
+
+function atualizarEspera(i, valor){
+
+  etapas[i].esperarResposta =
+    valor;
+}
+
+// =====================================
+// SALVAR
+// =====================================
+
+async function salvar(){
+
+  try{
+
+    const payload = {
+
+      ativo: automacaoAtiva,
+
+      privado: {
+
+        gatilhos:
+          textoParaArray(
+            document.getElementById("gatilhosPrivado").value
+          ),
+
+        resposta:
+          document.getElementById("respostaPrivado").value
+      },
+
+      grupo: {
+
+        gatilhos:
+          textoParaArray(
+            document.getElementById("gatilhosGrupo").value
+          ),
+
+        resposta:
+          document.getElementById("respostaGrupo").value
+      },
+
+      funil: {
+
+        ativo:true,
+
+        gatilhos:
+          textoParaArray(
+            document.getElementById("gatilhosFunil").value
+          ),
+
+        respostas_positivas:
+          textoParaArray(
+            document.getElementById("respostasPositivas").value
+          ),
+
+        etapas: etapas
+      }
+    };
+
+    await fetch("/api/respostas", {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify(payload)
+    });
+
+    alert("✅ Configurações salvas!");
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("❌ Erro ao salvar");
+  }
+}
+
+// =====================================
+// ATIVAR / DESATIVAR
+// =====================================
+
+async function alternar(){
+
+  try{
+
+    const res =
+      await fetch("/api/respostas/ativar", {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          ativo: !automacaoAtiva
+        })
+      });
+
+    const data =
+      await res.json();
+
+    automacaoAtiva =
+      data.ativo;
+
+    atualizarStatus();
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Erro ao alterar status");
+  }
+}
+
+carregar();
+
+</script>
+
+</body>
+</html>

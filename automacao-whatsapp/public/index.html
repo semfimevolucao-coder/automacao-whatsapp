@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Automazap</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Entrar no Automazap</h2>
+
+    <input type="email" id="email" placeholder="Digite seu e-mail" required />
+
+    <button onclick="verificarPlano()">Entrar</button>
+  </div>
+
+<script>
+const VIP_LIST_URL = "https://script.google.com/macros/s/AKfycbxGmo9BTmmEF6LvjUK7S2gIUJCmL_P2kJVu-MekxUizsNmY25XwaKMSCmSsoamFoJqpxg/exec";
+
+// 🔥 Pega IP
+async function getIP() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip;
+  } catch {
+    return 'unknown';
+  }
+}
+
+// 🔥 VERIFICA LOGIN
+async function verificarPlano() {
+  const emailInput = document.getElementById('email');
+  const email = emailInput.value.trim().toLowerCase();
+
+  if (!email) {
+    alert('Digite seu e-mail para continuar.');
+    return;
+  }
+
+  const ip = await getIP();
+
+  try {
+    const url = `${VIP_LIST_URL}?action=check&email=${encodeURIComponent(email)}&ip=${encodeURIComponent(ip)}`;
+
+    // 🔥 IMPORTANTE: mode: 'no-cors' REMOVE BLOQUEIO (mas limita resposta)
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error("Erro na requisição");
+    }
+
+    const data = await res.json();
+
+    if (data.authorized) {
+      alert(`✅ Acesso liberado! Dispositivos usados: ${data.devices}`);
+      window.location.href = 'automazap.html';
+
+    } else if (data.reason === 'too_many_devices') {
+      alert('🚫 Limite de dispositivos atingido.');
+      window.location.href = 'nao_autorizado.html';
+
+    } else {
+      alert('🚫 E-mail não autorizado.');
+      window.location.href = 'nao_autorizado.html';
+    }
+
+  } catch (err) {
+    console.error("Erro:", err);
+
+    alert("❌ Erro ao verificar acesso.\n\n👉 Abra o sistema pelo servidor (http://localhost:3000)");
+  }
+}
+</script>
+
+</body>
+</html>
