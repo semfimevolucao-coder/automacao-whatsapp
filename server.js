@@ -195,12 +195,98 @@ async function startWhatsApp() {
     // 🤖 RESPOSTAS SIMPLES
     // ======================================
     const config = readJSON(configPath);
+// ======================================
+// 🧠 FUNIL
+// ======================================
+const funil = config.funil;
+let funilState = readJSON(funilStatePath);
+let leads = readJSON(leadsPath);
 
-    const regra = isGrupo ? config.grupo : config.privado;
+// 🔥 Só funciona no PRIVADO
+if (!isGrupo && funil?.ativo) {
 
-    if (contemGatilho(texto, regra.gatilhos)) {
-      await sock.sendMessage(numero, { text: regra.resposta });
+  // ================================
+  // 🚀 INICIAR FUNIL
+  // ================================
+  if (!funilState[numero] && contemGatilho(texto, funil.gatilhos)) {
+
+    console.log("🚀 Iniciando funil:", numero);
+
+    // salvar lead
+    leads.push({
+      numero,
+      nome: msg.pushName || "Sem nome",
+      inicio: Date.now()
+    });
+    writeJSON(leadsPath, leads);
+
+    // iniciar etapa 0
+    funilState[numero] = {
+      etapa: 0,
+      aguardando: funil.etapas[0].esperarResposta
+    };
+    writeJSON(funilStatePath, funilState);
+
+    // enviar primeira mensagem
+    const etapa = funil.etapas[0];
+    const mensagem = etapa.mensagem.replace("{{nome}}", msg.pushName || "");
+
+    await delay(etapa.delay * 1000);
+    await sock.sendMessage(numero, { text: mensagem });
+
+    return;
+  }
+
+  // ================================
+  // 🔁 CONTINUAR FUNIL
+  // ================================
+  if (funilState[numero]) {
+
+    let estado = funilState[numero];
+    let etapaAtual = estado.etapa;
+
+    // se precisa resposta
+    if (estado.aguardando) {
+
+      if (!contemGatilho(texto, funil.respostas_positivas)) {
+        return;
+      }
     }
+
+    // próxima etapa
+    etapaAtual++;
+
+    if (!funil.etapas[etapaAtual]) {
+      console.log("🏁 Funil finalizado:", numero);
+      delete funilState[numero];
+      writeJSON(funilStatePath, funilState);
+      return;
+    }
+
+    const etapa = funil.etapas[etapaAtual];
+
+    estado.etapa = etapaAtual;
+    estado.aguardando = etapa.esperarResposta;
+
+    funilState[numero] = estado;
+    writeJSON(funilStatePath, funilState);
+
+    const mensagem = etapa.mensagem.replace("{{nome}}", msg.pushName || "");
+
+    await delay(etapa.delay * 1000);
+    await sock.sendMessage(numero, { text: mensagem });
+
+    return;
+  }
+}
+// 🔥 só responde simples se NÃO estiver no funil
+if (!funilState[numero]) {
+  const regra = isGrupo ? config.grupo : config.privado;
+
+  if (contemGatilho(texto, regra.gatilhos)) {
+    await sock.sendMessage(numero, { text: regra.resposta });
+  }
+}
   });
 }
 
@@ -350,7 +436,8 @@ app.post("/agendar", upload.single("imagem"), async (req, res) => {
 });
 
 app.post("/parar", (req, res) => {
-  
+
+  envioAtivo = false; // 🔥 ESSENCIAL
 
   if (loopEnvio) {
     clearTimeout(loopEnvio);
