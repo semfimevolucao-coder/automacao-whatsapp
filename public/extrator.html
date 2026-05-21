@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Extrator de Contatos</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
 
   <style>
     body {
@@ -96,7 +96,6 @@
 
   <button id="verificar">🔗 Verificar Conexão</button>
   <p id="statusConexao">Status: aguardando...</p>
-  <div id="qr-container"></div>
 
   <label>Grupo:</label>
   <select id="grupo"></select>
@@ -115,22 +114,34 @@
 
 <script>
 
+// 🔥 DEFINE AUTOMATICAMENTE BASE DA API
+const API_BASE = window.location.origin;
+
 let contatosExtraidos = [];
 
 // ================================
 // 🔗 VERIFICAR
 // ================================
 document.getElementById("verificar").onclick = async () => {
-  const res = await fetch('${API_BASE}/verificar');
-  const data = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/verificar`);
 
-  document.getElementById("statusConexao").innerHTML =
-    data.status === "conectado"
-      ? "<span class='status-ok'>Conectado</span>"
-      : "<span class='status-bad'>Desconectado</span>";
+    if (!res.ok) throw new Error("Erro na API");
 
-  if (data.status === "conectado") {
-    carregarGrupos();
+    const data = await res.json();
+
+    document.getElementById("statusConexao").innerHTML =
+      data.status === "conectado"
+        ? "<span class='status-ok'>Conectado</span>"
+        : "<span class='status-bad'>Desconectado</span>";
+
+    if (data.status === "conectado") {
+      carregarGrupos();
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao verificar conexão");
   }
 };
 
@@ -138,111 +149,121 @@ document.getElementById("verificar").onclick = async () => {
 // 📦 GRUPOS
 // ================================
 async function carregarGrupos() {
-  const res = await fetch('${API_BASE}/grupos');
-  const grupos = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/grupos`);
+    const grupos = await res.json();
 
-  const select = document.getElementById("grupo");
-  select.innerHTML = "<option>Selecione</option>";
+    const select = document.getElementById("grupo");
+    select.innerHTML = "<option value=''>Selecione</option>";
 
-  grupos.forEach(g => {
-    const opt = document.createElement("option");
-    opt.value = g.id;
-    opt.textContent = g.nome;
-    select.appendChild(opt);
-  });
+    grupos.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g.id;
+      opt.textContent = g.nome;
+      select.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao carregar grupos");
+  }
 }
 
 // ================================
-// 🔍 EXTRAIR + FILTRAR
+// 🔍 EXTRAIR
 // ================================
 async function extrairContatos() {
 
-  const grupoId = document.getElementById("grupo").value;
-  if (!grupoId) return alert("Selecione um grupo");
+  try {
 
-  const res = await fetch(`${API_BASE}/api/extrair/${grupoId}`);
-  const data = await res.json();
+    const grupoId = document.getElementById("grupo").value;
+    if (!grupoId) return alert("Selecione um grupo");
 
-  // 🔥 FILTRO PESADO
-  contatosExtraidos = (data.contatos || []).filter(c => {
+    const res = await fetch(`${API_BASE}/api/extrair/${grupoId}`);
 
-    if (!c.numero) return false;
+    if (!res.ok) throw new Error("Erro ao extrair");
 
-    if (c.numero.includes("@lid")) return false;
-    if (c.numero.includes("@g.us")) return false;
+    const data = await res.json();
 
-    const numero = c.numero.replace(/\D/g, "");
+    contatosExtraidos = (data.contatos || []).filter(c => {
 
-    if (numero.length < 10 || numero.length > 13) return false;
+      if (!c.numero) return false;
+      if (c.numero.includes("@lid")) return false;
+      if (c.numero.includes("@g.us")) return false;
 
-    return true;
-  });
+      const numero = c.numero.replace(/\D/g, "");
+      return numero.length >= 10 && numero.length <= 13;
+    });
 
-  const lista = document.getElementById("listaContatos");
-  lista.innerHTML = "";
+    const lista = document.getElementById("listaContatos");
+    lista.innerHTML = "";
 
-  contatosExtraidos.forEach(c => {
+    contatosExtraidos.forEach(c => {
 
-    const div = document.createElement("div");
-    div.className = "contato-item";
+      const div = document.createElement("div");
+      div.className = "contato-item";
 
-    div.innerHTML = `
-      <input type="checkbox" checked data-nome="${c.nome}" data-numero="${c.numero}">
-      <label>${c.nome} - ${c.numero}</label>
-    `;
+      div.innerHTML = `
+        <input type="checkbox" checked data-nome="${c.nome}" data-numero="${c.numero}">
+        <label>${c.nome} - ${c.numero}</label>
+      `;
 
-    lista.appendChild(div);
-  });
+      lista.appendChild(div);
+    });
 
-  document.getElementById("info").innerHTML =
-    `✅ ${contatosExtraidos.length} contatos válidos`;
+    document.getElementById("info").innerHTML =
+      `✅ ${contatosExtraidos.length} contatos válidos`;
 
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao extrair contatos");
+  }
 }
 
 // ================================
-// 🚀 ENVIO COM FILTRO FINAL
+// 🚀 ENVIAR
 // ================================
 async function enviarMensagens() {
 
-  let selecionados = Array.from(
-    document.querySelectorAll(".contato-item input:checked")
-  ).map(c => ({
-    nome: c.dataset.nome,
-    numero: c.dataset.numero
-  }));
+  try {
 
-  const mensagem = document.getElementById("mensagem").value.trim();
+    let selecionados = Array.from(
+      document.querySelectorAll(".contato-item input:checked")
+    ).map(c => ({
+      nome: c.dataset.nome,
+      numero: c.dataset.numero
+    }));
 
-  if (!mensagem) return alert("Digite a mensagem");
+    const mensagem = document.getElementById("mensagem").value.trim();
 
-  // 🔥 VALIDAÇÃO FINAL
-  selecionados = selecionados.filter(c => {
+    if (!mensagem) return alert("Digite a mensagem");
 
-    if (!c.numero) return false;
+    selecionados = selecionados.filter(c => {
+      const numero = c.numero.replace(/\D/g, "");
+      return numero.length >= 10;
+    });
 
-    if (c.numero.includes("@lid")) return false;
+    if (!selecionados.length) {
+      return alert("Nenhum contato válido");
+    }
 
-    const numero = c.numero.replace(/\D/g, "");
+    const res = await fetch(`${API_BASE}/api/enviar`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        contatos: selecionados,
+        mensagem
+      })
+    });
 
-    return numero.length >= 10;
-  });
+    const data = await res.json();
 
-  if (!selecionados.length) {
-    return alert("Nenhum contato válido");
+    alert(`✅ ${data.enviados} enviados`);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao enviar mensagens");
   }
-
-  const res = await fetch('${API_BASE}/api/enviar', {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      contatos: selecionados,
-      mensagem
-    })
-  });
-
-  const data = await res.json();
-
-  alert(`✅ ${data.enviados} enviados`);
 }
 
 // ================================
@@ -250,24 +271,31 @@ async function enviarMensagens() {
 // ================================
 async function salvarContatos() {
 
-  const selecionados = Array.from(
-    document.querySelectorAll(".contato-item input:checked")
-  ).map(c => ({
-    nome: c.dataset.nome,
-    numero: c.dataset.numero
-  }));
+  try {
 
-  if (!selecionados.length) return alert("Nada selecionado");
+    const selecionados = Array.from(
+      document.querySelectorAll(".contato-item input:checked")
+    ).map(c => ({
+      nome: c.dataset.nome,
+      numero: c.dataset.numero
+    }));
 
-  const res = await fetch('${API_BASE}/api/salvar', {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ contatos: selecionados })
-  });
+    if (!selecionados.length) return alert("Nada selecionado");
 
-  const data = await res.json();
+    const res = await fetch(`${API_BASE}/api/salvar`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ contatos: selecionados })
+    });
 
-  alert(`💾 ${data.salvos} contatos salvos`);
+    const data = await res.json();
+
+    alert(`💾 ${data.salvos} contatos salvos`);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao salvar contatos");
+  }
 }
 
 </script>
