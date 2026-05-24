@@ -10,9 +10,10 @@ import makeWASocket, {
   useMultiFileAuthState,
   fetchLatestBaileysVersion
 } from "@whiskeysockets/baileys";
-
+let envioAtivo = false;
+let primeiroCiclo = true; // 🔥 ESSENCIAL
 // ======================================
-// 🔧 PATHS
+// 🔧  PATHS
 // ======================================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -175,21 +176,23 @@ async function startWhatsApp() {
     // ======================================
     // 🔥 CONTADOR DE GRUPO (ANTI-SPAM)
     // ======================================
-    if (isGrupo) {
+if (isGrupo) {
 
-      const stats = readJSON(grupoStatsPath);
+  const stats = readJSON(grupoStatsPath);
 
-      if (!stats[numero]) {
-        stats[numero] = {
-          mensagens: 0,
-          ultimaMensagemBot: 0
-        };
-      }
+  if (!stats[numero]) {
+    stats[numero] = {
+      mensagens: 0,
+      ultimaMensagemBot: 0,
+      ultimaAtividade: 0
+    };
+  }
 
-      stats[numero].mensagens++;
+  stats[numero].mensagens++;
+  stats[numero].ultimaAtividade = Date.now(); // 🔥 ESSENCIAL
 
-      writeJSON(grupoStatsPath, stats);
-    }
+  writeJSON(grupoStatsPath, stats);
+}
 
     // ======================================
     // 🤖 RESPOSTAS SIMPLES
@@ -293,7 +296,6 @@ if (!funilState[numero]) {
 // ======================================
 // 📩 ENVIO EM MASSA COM FILTRO (CORRIGIDO)
 // ======================================
-let primeiroCiclo = true;
 
 async function escalonarEnvio(grupos, mensagem, imagem) {
 
@@ -303,6 +305,13 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
   }
 
   const stats = readJSON(grupoStatsPath) || {};
+  const agora = Date.now();
+
+  // 🔧 CONFIGURAÇÕES
+  const MIN_MENSAGENS = 10;
+  const MAX_TEMPO_INATIVO = 30 * 60 * 1000; // 30 min
+  const COOLDOWN_ENVIO = 60 * 60 * 1000; // 1 hora
+  const RESET_GRUPO_MORTO = 2 * 60 * 60 * 1000; // 2 horas
 
   console.log("📢 Iniciando ciclo | Primeiro ciclo:", primeiroCiclo);
 
@@ -310,17 +319,51 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
 
     if (!envioAtivo) break;
 
-    const data = stats[grupo] || {
-      mensagens: 0,
-      ultimaMensagemBot: 0
-    };
+    // 🔥 garantir estrutura
+    if (!stats[grupo]) {
+      stats[grupo] = {
+        mensagens: 0,
+        ultimaMensagemBot: 0,
+        ultimaAtividade: 0
+      };
+    }
+
+    let data = stats[grupo];
+
+    const tempoDesdeUltimaAtividade = agora - (data.ultimaAtividade || 0);
+    const tempoDesdeUltimoEnvio = agora - (data.ultimaMensagemBot || 0);
+
+    const ativoRecente = tempoDesdeUltimaAtividade < MAX_TEMPO_INATIVO;
+    const podeEnviar = tempoDesdeUltimoEnvio > COOLDOWN_ENVIO;
+
+    // 🔥 limpar grupo morto
+    if (tempoDesdeUltimaAtividade > RESET_GRUPO_MORTO) {
+      console.log("🧹 Reset grupo inativo:", grupo);
+      data.mensagens = 0;
+      stats[grupo] = data;
+      writeJSON(grupoStatsPath, stats);
+      continue;
+    }
 
     // ======================================
-    // 🔥 REGRA ANTI-SPAM (SÓ APÓS PRIMEIRO CICLO)
+    // 🔥 FILTRO ANTI-SPAM (APÓS PRIMEIRO CICLO)
     // ======================================
-    if (!primeiroCiclo && data.mensagens < 10) {
-      console.log("⛔ Ignorado (sem atividade):", grupo);
-      continue;
+    if (!primeiroCiclo) {
+
+      if (data.mensagens < MIN_MENSAGENS) {
+        console.log("⛔ Ignorado (pouca atividade):", grupo);
+        continue;
+      }
+
+      if (!ativoRecente) {
+        console.log("⛔ Ignorado (grupo parado):", grupo);
+        continue;
+      }
+
+      if (!podeEnviar) {
+        console.log("⛔ Ignorado (cooldown ativo):", grupo);
+        continue;
+      }
     }
 
     try {
@@ -338,7 +381,7 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
 
       console.log("✅ Enviado:", grupo);
 
-      // 🔄 RESET APENAS SE ENVIOU
+      // 🔥 reset após envio
       data.mensagens = 0;
       data.ultimaMensagemBot = Date.now();
 
@@ -349,11 +392,12 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
       console.log("❌ Erro ao enviar:", grupo, err?.message);
     }
 
+    // 🔥 delay humano
     const tempoDelay = 15000 + Math.random() * 10000;
     await delay(tempoDelay);
   }
 
-  // 👉 depois do primeiro ciclo, ativa filtro
+  // 🔥 ativar filtro após primeiro ciclo
   if (primeiroCiclo) {
     console.log("✅ Primeiro ciclo concluído - ativando filtro anti-spam");
     primeiroCiclo = false;
