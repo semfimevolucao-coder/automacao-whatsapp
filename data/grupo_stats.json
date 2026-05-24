@@ -1,5 +1,1 @@
-stats[numero] = {
-  mensagens: 0,
-  ultimaMensagemBot: 0,
-  ultimaAtividade: 0
-};
+{}
