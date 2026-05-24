@@ -7,6 +7,7 @@
       "olá",
       "opa",
       "eae",
+      "eae",
       "bom dia",
       "boa tarde",
       "boa noite",
@@ -18,11 +19,13 @@
       "interesse",
       "renda extra",
       "ganhar dinheiro",
-      "dinheiro",
-      "funciona",
-      "quero começar"
+      "youtube",
+      "canal dark",
+      "ia",
+      "inteligencia artificial",
+      "inteligência artificial"
     ],
-    "resposta": "Fala comigo 👋\n\nVi que você quer uma forma de ganhar dinheiro usando só o celular 📱💸\n\nMe manda *\"como funciona\"* que eu te explico rapidinho 👍"
+    "resposta": "Fala comigo 👋\n\nVi que você tem interesse em ganhar dinheiro online sem aparecer.\n\nMe pergunta como funciona que eu te explico rapidinho 👍"
   },
   "grupo": {
     "gatilhos": [],
@@ -39,14 +42,18 @@
       "interesse",
       "tenho interesse",
       "quero",
+      "youtube",
+      "canal dark",
       "ganhar dinheiro",
       "renda extra",
       "me chama",
       "fala ai",
+      "fala aí",
       "curti",
       "quero começar",
       "como ganha",
       "da dinheiro",
+      "dá dinheiro",
       "quero entrar",
       "me manda",
       "manda"
@@ -61,7 +68,9 @@
       "manda",
       "pode mandar",
       "continua",
+      "continue",
       "ok",
+      "okk",
       "blz",
       "beleza",
       "show",
@@ -72,32 +81,34 @@
       "bora",
       "quero sim",
       "tenho interesse",
+      "fala ai",
+      "fala aí",
       "explica",
       "me mostra",
       "como faz",
       "quero aprender",
-      "primeira vez",
-      "faz",
-      "tentei"
+      "vamo",
+      "vamos",
+      "tentei",
+      "primeira vez"
     ],
     "etapas": [
       {
-        "mensagem": "Fala {{nome}} 👋\n\nVou ser direto contigo...\n\nExiste um jeito simples de fazer dinheiro pelo celular, mesmo começando do zero 📱💸\n\nQuer que eu te explique como funciona?",
-        "delay": 4,
+        "mensagem": "Fala comigo {{nome}} 👋\n\nTudo certo?\n\nVou te explicar rapidinho como funciona 👇",
+        "delay": 4
+      },
+      {
+        "mensagem": "Basicamente é um método pra ganhar dinheiro no YouTube sem precisar aparecer.\n\nVocê usa vídeos simples + inteligência artificial pra criar conteúdo.\n\nE o mais interessante:\nnão precisa aparecer, nem ter experiência.\n\nTem gente começando do zero e já vendo resultado.\n\nVocê já tentou ganhar dinheiro online antes ou seria a primeira vez?",
+        "delay": 7,
         "esperarResposta": true
       },
       {
-        "mensagem": "Basicamente é um método com várias formas de ganhar dinheiro online usando só o celular.\n\n✔️ Nada complicado\n✔️ Sem precisar aparecer\n✔️ Dá pra começar do zero\n\nE o diferencial:\n\nVocê também pode ganhar com indicações e criar renda todos os dias 🔥\n\nVocê já tentou ganhar dinheiro online antes?",
-        "delay": 6,
-        "esperarResposta": true
-      },
-      {
-        "mensagem": "Entendi 👍\n\nA maioria das pessoas já tentou várias coisas e não teve resultado mesmo...\n\nO problema é que sempre mostram só partes — nunca o caminho completo.\n\nAqui você recebe tudo organizado:\n\n✔️ 7 formas reais de ganhar dinheiro\n✔️ Apps que realmente pagam\n✔️ Estratégia simples pra começar hoje\n✔️ Método de indicação (onde está o lucro de verdade)\n\nMesmo começando do zero.\n\nSe fizer sentido pra você, posso te mostrar como começar hoje 👀",
+        "mensagem": "Entendi 👍\n\nA maioria das pessoas já tentou várias coisas e não deu certo mesmo.\n\nEu também já passei por isso.\n\nO que muda aqui é que o método é mais simples e direto.\n\nVocê não precisa aparecer\nNão precisa investir alto\nE a IA faz praticamente tudo pra você\n\nSe fizer sentido, posso te mostrar como algumas pessoas estão começando e evoluindo nesse modelo 👀",
         "delay": 8,
         "esperarResposta": true
       },
       {
-        "mensagem": "Perfeito 👇\n\nVou ser direto contigo.\n\nEsse é um guia completo que mostra exatamente o passo a passo pra começar a fazer de R$30 a R$200 por dia usando só o celular.\n\nVocê não depende de uma única forma — são várias formas + estratégia pra escalar.\n\nE o melhor:\n\n💸 Valor simbólico (menos que um lanche)\n✅ Acesso imediato\n🔒 7 dias de garantia\n\n👉 Acessa aqui:\nhttps://pay.cakto.com.br/xdbibi3_579312\n\nSe tiver dúvida, me chama aqui 👍",
+        "mensagem": "Perfeito 👇\n\nEu vou ser direto contigo pra não perder teu tempo.\n\nExiste um treinamento completo que mostra exatamente esse passo a passo.\n\nDo zero até começar a monetizar com canal dark.\n\nE não é nada absurdo de preço…\n\nHoje ele tá saindo por R$67.\n\nMenos que um lanche.\n\nVocê recebe:\n\n✔️ Como criar canal dark do zero\n✔️ Como usar IA pra gerar vídeos\n✔️ Nichos que viralizam\n✔️ Estratégia pra crescer rápido\n✔️ Como monetizar\n\nE o mais importante:\n\nTem 7 dias de garantia.\n\nSe você entrar, ver e achar que não é pra você, pode pedir reembolso.\n\nOu seja, risco praticamente zero.\n\n👉 Aqui está o acesso:\nhttps://pay.cakto.com.br/dgdbyby?affiliate=LBpawE3Z&utm_source=whatsapp&utm_medium=funil&utm_campaign=automazap\n\nSe tiver qualquer dúvida, me chama aqui que eu te ajudo.",
         "delay": 10,
         "esperarResposta": false
       }
