@@ -318,7 +318,7 @@ async function escalonarEnvio(grupos, mensagem, imagem) {
     // ======================================
     // 🔥 REGRA ANTI-SPAM (SÓ APÓS PRIMEIRO CICLO)
     // ======================================
-    if (!primeiroCiclo && data.mensagens < 25) {
+    if (!primeiroCiclo && data.mensagens < 10) {
       console.log("⛔ Ignorado (sem atividade):", grupo);
       continue;
     }
