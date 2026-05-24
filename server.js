@@ -112,7 +112,7 @@ let sock;
 let ultimoQRCode = null;
 let whatsappStatus = "desconectado";
 let gruposDisponiveis = [];
-let envioAtivo = false;
+
 
 async function startWhatsApp() {
 
