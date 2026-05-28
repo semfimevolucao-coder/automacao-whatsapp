@@ -13,13 +13,13 @@ import makeWASocket, {
 let envioAtivo = false;
 let primeiroCiclo = true; // 🔥 ESSENCIAL
 // ======================================
-// 🔧  PATHS
+// 🔧PATHS
 // ======================================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ======================================
-// 📁 ESTRUTURA /data
+// 📁 ESTRUTURA/data
 // ======================================
 const dataDir = path.join(__dirname, "data");
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
@@ -59,7 +59,7 @@ initFile(funilStatePath, {});
 initFile(grupoStatsPath, {});
 
 // ======================================
-// 🔧 HELPERS
+// 🔧HELPERS
 // ======================================
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
